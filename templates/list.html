@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h1 style="text-transform: uppercase; font-weight: 800; letter-spacing: 2px; margin: 0;">Event List</h1>
+        <div>
+            <a href="{{ url_for('download_all_ics') }}" class="btn btn-sm">Export Calendar (.ICS)</a>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 30px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{{ url_for('event_list', filter='day') }}" class="btn {% if current_filter == 'day' %}active{% endif %}">Today</a>
+        <a href="{{ url_for('event_list', filter='week') }}" class="btn {% if current_filter == 'week' %}active{% endif %}">This Week</a>
+        <a href="{{ url_for('event_list', filter='month') }}" class="btn {% if current_filter == 'month' %}active{% endif %}">This Month</a>
+        <a href="{{ url_for('event_list', filter='year') }}" class="btn {% if current_filter == 'year' %}active{% endif %}">This Year</a>
+    </div>
+
+    {% if events %}
+        {% for event in events %}
+            <div class="card" style="padding: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h3 style="margin-top: 0; margin-bottom: 8px; text-transform: uppercase; font-size: 1.4em; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; flex-wrap: wrap;">
+                            {{ event.name }}
+                            {% if event.tag == 'Public' %}
+                                <span class="tag tag-public">Public</span>
+                            {% elif event.tag == 'Members Only' %}
+                                <span class="tag tag-members-only">Members Only</span>
+                            {% elif event.tag == 'Baptism' %}
+                                <span class="tag tag-baptism">Baptism</span>
+                            {% endif %}
+                        </h3>
+                        
+                        <div style="color: var(--text-main); margin-bottom: 15px; font-size: 1.1em; border-left: 2px solid var(--text-muted); padding-left: 10px;">
+                            <strong>{{ event.start_time.strftime('%A, %d/%m/%Y') }}</strong> | {{ event.start_time.strftime('%H:%M') }}{% if event.end_time %} &mdash; {{ event.end_time.strftime('%H:%M') }}{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.name | urlencode }}&dates={{ event.start_time | gcal_date_local }}/{% if event.end_time %}{{ event.end_time | gcal_date_local }}{% else %}{{ event.start_time | gcal_date_local }}{% endif %}&ctz=Europe/Bucharest&details={{ event.description | urlencode }}&location={{ event.location | urlencode }}" target="_blank" class="btn btn-sm">Google Calendar</a>
+                    </div>
+                </div>
+                
+                {% if event.location %}
+                    <p style="margin: 5px 0; font-size: 0.9em; color: var(--text-muted);"><strong>Location:</strong> {{ event.location }}</p>
+                {% endif %}
+                
+                {% if event.description %}
+                    <p style="margin: 15px 0 0 0;">{{ event.description }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <p style="text-align: center; color: var(--text-muted); margin: 0; padding: 20px;">There are no events scheduled for this timeframe.</p>
+        </div>
+    {% endif %}
+{% endblock %}

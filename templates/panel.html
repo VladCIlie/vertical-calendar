@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 style="text-transform: uppercase; font-weight: 800; letter-spacing: 2px;">User Roles Panel</h1>
+    
+    <div class="card">
+        <h2 style="margin-top: 0;">Add User Manually</h2>
+        <form action="{{ url_for('panel') }}" method="POST" class="responsive-flex" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <input type="hidden" name="action" value="add_user">
+            <div class="form-group" style="flex: 1; min-width: 120px; margin-bottom: 0;">
+                <label>First Name</label>
+                <input type="text" name="first_name" required>
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 120px; margin-bottom: 0;">
+                <label>Last Name</label>
+                <input type="text" name="last_name" required>
+            </div>
+            <div class="form-group" style="flex: 2; min-width: 200px; margin-bottom: 0;">
+                <label>Email Address</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group" style="flex: 1; min-width: 120px; margin-bottom: 0;">
+                <label>Role</label>
+                <select name="role">
+                    <option value="Public">Public</option>
+                    <option value="Member">Member</option>
+                    <option value="Leader">Leader</option>
+                    <option value="Elder">Elder</option>
+                </select>
+            </div>
+            <div style="flex: 1; margin-bottom: 0; min-width: 100px;">
+                <button type="submit" class="btn" style="width: 100%; height: 46px; padding: 0;">Add User</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top: 0;">Existing Users</h2>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; text-align: left; border-collapse: collapse; min-width: 600px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 10px;">Name</th>
+                        <th style="padding: 10px;">Email</th>
+                        <th style="padding: 10px;">Current Role</th>
+                        <th style="padding: 10px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 15px 10px;">{{ user.first_name }} {{ user.last_name }}</td>
+                        <td style="padding: 15px 10px;">{{ user.email }}</td>
+                        <td style="padding: 15px 10px; font-weight: bold;">{{ user.role }}</td>
+                        <td style="padding: 15px 10px;">
+                            {% if user.email != 'vladilie99@gmail.com' %}
+                            <form action="{{ url_for('panel') }}" method="POST" style="display: flex; gap: 10px; margin: 0;">
+                                <input type="hidden" name="action" value="update_role">
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <select name="role" style="padding: 6px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border-color);">
+                                    <option value="Public" {% if user.role == 'Public' %}selected{% endif %}>Public</option>
+                                    <option value="Member" {% if user.role == 'Member' %}selected{% endif %}>Member</option>
+                                    <option value="Leader" {% if user.role == 'Leader' %}selected{% endif %}>Leader</option>
+                                    <option value="Elder" {% if user.role == 'Elder' %}selected{% endif %}>Elder</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm" style="margin: 0;">Update</button>
+                            </form>
+                            {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.8em; text-transform: uppercase;">System Admin</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

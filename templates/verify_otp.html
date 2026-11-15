@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 50px auto;">
+    <h2 style="margin-top: 0; text-transform: uppercase;">Enter Login Code</h2>
+    <p style="font-size: 0.9em; color: var(--text-muted); margin-bottom: 20px;">We sent a 6-digit code to your email.</p>
+    <form method="POST">
+        <div class="form-group">
+            <label>6-Digit Code</label>
+            <input type="text" name="otp" required pattern="\d{6}" maxlength="6" style="text-align: center; letter-spacing: 5px; font-size: 1.2em;">
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Verify & Log In</button>
+    </form>
+</div>
+{% endblock %}

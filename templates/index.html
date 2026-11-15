@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="hero">
+        <p class="verse">"Învaţă-ne să ne numărăm bine zilele, ca să căpătăm o inimă înţeleaptă!"</p>
+        <p class="reference">Psalmul 90:12 (VDC)</p>
+    </div>
+
+    <div class="calendar-header">
+        <a href="{{ url_for('index', year=prev_year, month=prev_month) }}" class="btn">&larr; PREV</a>
+        <h2>{{ month_name }} {{ year }}</h2>
+        <a href="{{ url_for('index', year=next_year, month=next_month) }}" class="btn">NEXT &rarr;</a>
+    </div>
+
+    <div class="calendar-wrapper">
+        <div class="calendar-grid">
+            <div class="day-name">Mon</div>
+            <div class="day-name">Tue</div>
+            <div class="day-name">Wed</div>
+            <div class="day-name">Thu</div>
+            <div class="day-name">Fri</div>
+            <div class="day-name">Sat</div>
+            <div class="day-name">Sun</div>
+            
+            {% for week in cal %}
+                {% for day in week %}
+                    <div class="calendar-day {% if day == 0 %}empty{% endif %}">
+                        {% if day != 0 %}
+                            <span class="day-number">{{ day }}</span>
+                            {% for event in events_by_day[day] %}
+                                <span class="cal-event">
+                                    <strong>{{ event.start_time.strftime('%H:%M') }}</strong> - {{ event.name }}
+                                    {% if event.tag == 'Members Only' %}
+                                        <span style="color: #ff6666; font-weight: bold;">(M)</span>
+                                    {% elif event.tag == 'Baptism' %}
+                                        <span style="color: #66b3ff; font-weight: bold;">(B)</span>
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px; text-align: right;">
+        <a href="{{ url_for('download_all_ics') }}" class="btn btn-sm">Export Full Calendar (.ICS)</a>
+    </div>
+
+    <hr>
+
+    <h2 style="text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Event Details</h2>
+
+    {% if detail_events %}
+        {% for event in detail_events %}
+            <div class="card">
+                <h3 style="margin-top: 0; text-transform: uppercase; font-size: 1.5em; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; flex-wrap: wrap;">
+                    {{ event.name }}
+                    {% if event.tag == 'Public' %}
+                        <span class="tag tag-public">Public</span>
+                    {% elif event.tag == 'Members Only' %}
+                        <span class="tag tag-members-only">Members Only</span>
+                    {% elif event.tag == 'Baptism' %}
+                        <span class="tag tag-baptism">Baptism</span>
+                    {% endif %}
+                </h3>
+                
+                <div class="event-meta">
+                    <p style="margin: 5px 0;"><strong>FIRST IN MONTH:</strong> {{ event.start_time.strftime('%d/%m/%Y | %H:%M') }}{% if event.end_time %} &mdash; {{ event.end_time.strftime('%H:%M') }}{% endif %}</p>
+                    {% if event.recurrence_display %}
+                        <p style="margin: 5px 0;"><strong>RECURS:</strong> {{ event.recurrence_display }}</p>
+                    {% endif %}
+                    {% if event.location %}
+                        <p style="margin: 5px 0;"><strong>LOCATION:</strong> {{ event.location }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if event.description %}
+                    <p style="margin-bottom: 25px;">{{ event.description }}</p>
+                {% endif %}
+
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    {% if event.location %}
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ event.location | urlencode }}" target="_blank" class="btn btn-sm">Google Maps</a>
+                        <a href="http://maps.apple.com/?q={{ event.location | urlencode }}" target="_blank" class="btn btn-sm">Apple Maps</a>
+                    {% endif %}
+                    <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.name | urlencode }}&dates={{ event.start_time | gcal_date_local }}/{% if event.end_time %}{{ event.end_time | gcal_date_local }}{% else %}{{ event.start_time | gcal_date_local }}{% endif %}&ctz=Europe/Bucharest&details={{ event.description | urlencode }}&location={{ event.location | urlencode }}" target="_blank" class="btn btn-sm">Google Calendar</a>
+                    <a href="{{ url_for('download_ics', event_id=event.id) }}" class="btn btn-sm">Download .ICS</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>There are no events scheduled for this month.</p>
+    {% endif %}
+
+    <hr>
+    
+    <div class="card" style="max-width: 500px; margin: 0 auto;">
+        <h3 style="margin-top: 0; text-transform: uppercase; font-weight: 800;">Subscribe to Updates</h3>
+        <form action="{{ url_for('subscribe') }}" method="POST">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" name="email" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Subscribe</button>
+        </form>
+    </div>
+{% endblock %}
